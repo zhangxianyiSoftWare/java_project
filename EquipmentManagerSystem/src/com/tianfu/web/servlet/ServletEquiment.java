@@ -21,7 +21,6 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
 
-import com.tianfu.domain.EquipWorkState;
 import com.tianfu.domain.Equipment;
 import com.tianfu.service.Service;
 import com.tianfu.service.impl.EquipmentManager;
@@ -45,14 +44,13 @@ public class ServletEquiment extends BaseServlet
 	{
 		//get the encoding
 		String encode = super.config.getInitParameter("MyconfigEncoding");
-		System.out.println("encoding "+ encode);
 		request.setCharacterEncoding(encode!=null?encode:"UTF-8");
 
 		Equipment equip = new Equipment();
 		MergeUtils.mergeAttribute(equip, request);
 		//解析上传文件 
 		parseUploadFile(equip,request,response);
-		String ret = (String)service.login(equip);
+		String ret = (String)service.regiest(equip);
 		if("succ".equals(ret) || "existed".equals(ret))
 		{
 			request.getRequestDispatcher("/afterLogin/responseJSP/addSucc.jsp").forward(request, response);
@@ -61,6 +59,47 @@ public class ServletEquiment extends BaseServlet
 		request.getRequestDispatcher("/afterLogin/responseJSP/addFailed.jsp").forward(request, response);
 		return;
 	}
+	public void updateEquipment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
+		//get the encoding
+		Equipment equip = new Equipment();
+		//解析上传文件 
+		parseUploadFile(equip,request,response);
+		equip.setName(request.getParameter("name"));
+		System.out.println("uppdate equip "+equip);
+		Integer ret = service.update(equip);
+		System.out.println("update rows "+ret+" rows");
+		if(ret > 0 )
+		{
+			request.getRequestDispatcher("/afterLogin/responseJSP/addSucc.jsp").forward(request, response);
+			return;
+		}
+		request.getRequestDispatcher("/afterLogin/responseJSP/addFailed.jsp").forward(request, response);
+		return;
+    }
+	
+	public void deleteEquipment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		//get the encoding
+		String encode = super.config.getInitParameter("MyconfigEncoding");
+		request.setCharacterEncoding(encode!=null?encode:"UTF-8");
+		
+		Equipment equip = new Equipment();
+		//设置固定的
+		equip.setName(request.getParameter("name"));
+		System.out.println("nedd delete equipment"+equip);
+		
+		Integer ret = service.delete(equip);
+		if(ret > 0 )
+		{
+			//删除成功之后 再次刷新 也就是执行所有查询
+			findEquipmentBymanyCondition(request,response);
+			return;
+		}
+		request.getRequestDispatcher("/afterLogin/responseJSP/addFailed.jsp").forward(request, response);
+		return;
+	}
+	
 	
 	//download file
 	//para request
@@ -182,15 +221,15 @@ public class ServletEquiment extends BaseServlet
 			case "state":
 				if("working".equalsIgnoreCase(fieldvalue))
 				{
-					equip.setState(EquipWorkState.WORKING);
+					equip.setState("WORKING");
 				}
 				else if("ended".equalsIgnoreCase(fieldvalue))
 				{
-					equip.setState(EquipWorkState.END);
+					equip.setState("ENDED");
 				}
 				else if("broken".equalsIgnoreCase(fieldvalue))
 				{
-					equip.setState(EquipWorkState.BROKEN);
+					equip.setState("BROKEN");
 				}
 				break;
 			case "category":
@@ -208,6 +247,8 @@ public class ServletEquiment extends BaseServlet
 	
 	private void parseUploadFile(FileItem fileitem,Equipment equip)
 	{
+		String filedVa = fileitem.getFieldName();
+		System.out.println("filed value = "+filedVa);
 		try 
 		{
 			//获取绝对的路径
@@ -221,6 +262,7 @@ public class ServletEquiment extends BaseServlet
 			}
 			//得到 上传的文件名字
 			String fileName = fileitem.getName();
+			System.out.println("filename = "+fileName);
 			//处理文件名
 			if(fileName != null)
 			{
@@ -271,16 +313,6 @@ public class ServletEquiment extends BaseServlet
 		return childDirectory;
 	}
 	
-	/*
-	 * name editEquiment
-	 * para request
-	 * para response
-	 * */
-    public void editEquiment(HttpServletRequest request, HttpServletResponse response)
-    {
-    	
-    }
-    
     /*
 	 * name findEquipmentBymanyCondition
 	 * para request
@@ -290,7 +322,7 @@ public class ServletEquiment extends BaseServlet
     {
     	response.setContentType("text/html;charset=UTF-8");
 		//调用 业务逻辑
-		List<Equipment> list = service.findAll();
+		List<Object> list = service.findAll();
 		//跳转页面
 		if(list!=null)
 		{
@@ -298,4 +330,5 @@ public class ServletEquiment extends BaseServlet
 			request.getRequestDispatcher("/afterLogin/admin/admin.jsp").forward(request, response);
 		}
     }
+    
 }

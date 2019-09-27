@@ -41,18 +41,24 @@ public class Register extends HttpServlet {
 		//调用业务逻辑  logic
 		UserManager service = new UserManager();
 		User user = new User(); 
+    	MergeUtils.mergeAttribute(user, uForm);
+		Integer num;
 		try 
 		{
-	    	MergeUtils.mergeAttribute(user, uForm);
-			service.findUser(user);
-		} 
-		catch (UserExistException e) 
-		{
-			// TODO: handle exception
-			request.setAttribute("errorMessage", e.getMessage());
-	    	request.getRequestDispatcher("/jspComponent/registerFailed.jsp").forward(request, response);
-	    	return;
+			num = service.findUser(user);
+			if(num > 0)
+			{
+				// TODO: handle exception
+				request.setAttribute("errorMessage", "用户已经存在");
+		    	request.getRequestDispatcher("/jspComponent/registerFailed.jsp").forward(request, response);
+		    	return;
+			}
+		} catch (UserExistException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
+		
 		
 		//分发转向
 		if(service.regiest(uForm))

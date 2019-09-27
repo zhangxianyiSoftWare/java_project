@@ -29,5 +29,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
   		<br/>
   		<a href="${pageContext.request.contextPath}/afterLogin/admin/admin.jsp">查看设备列表（需要最高权限）</a>
   		<span>${errorMessage }</span>
+  		<br/>
+  		<br/>
+  		<a href="${pageContext.request.contextPath}/servlet/logout">用户注销</a>
+  		<span>${errorLogout }</span>
   </body>
 </html>

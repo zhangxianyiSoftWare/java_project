@@ -1,56 +1,87 @@
 package com.tianfu.service.impl;
-import java.sql.SQLException;
-import java.util.List;
 
-import com.tianfu.dao.Dao;
-import com.tianfu.dao.impl.EquipmentDao;
+
+import java.util.List;
+import org.apache.ibatis.session.SqlSession;
+import com.tianfu.dao.EquipmentMapper;
 import com.tianfu.domain.Equipment;
 import com.tianfu.service.Service;
-
+import com.tianfu.utils.SingletonSessionFacUtils;
 public class EquipmentManager implements Service 
 {
-	private Dao dao = new EquipmentDao();
-	
+	public EquipmentManager()
+	{
+		
+	}
 	
 	@Override
 	public Object login(Object obj) 
 	{
-		// TODO Auto-generated method stub
-		Equipment equip = (Equipment) dao.getObj(obj);
-		if(! equip.isEmpty())
-		{
-			return "existed";
-		}
-		//如果没有
-		if((Integer)dao.add(obj) > 0)
-		{
-			return "succ";
-		}
 		
-		return "failed";
-	}
-
-	@Override
-	public Object regiest(Object obj) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public List<Equipment> findAll() 
+	@Override
+	public Object regiest(Object obj) 
 	{
-		// TODO Auto-generated method stub
-		EquipmentDao dao = new EquipmentDao();
-		List<Equipment> equipments = null;
-		try 
+		SqlSession session = SingletonSessionFacUtils.getInstance().openSession();
+    	EquipmentMapper dao = session.getMapper(EquipmentMapper.class);
+		Equipment equip = (Equipment) dao.find(obj);
+		if(null == equip)
 		{
-			equipments = dao.findAllEquips();
-		} 
-		catch (SQLException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//如果没有
+			if(dao.add(obj) > 0)
+			{
+				session.commit();
+				session.close();
+				return "succ";
+			}
 		}
 		
-		return equipments;
+		if(! equip.isEmpty())
+		{
+			session.close();
+			return "existed";
+		}
+		
+		session.close();
+		return "failed";
 	}
+
+	public List<Object> findAll() {
+		// TODO Auto-generated method stub
+		SqlSession session = SingletonSessionFacUtils.getInstance().openSession();
+    	EquipmentMapper dao = session.getMapper(EquipmentMapper.class);
+		List<Object> list =  dao.findAll();
+		session.close();
+		return list;
+	}
+	
+	public Integer update(Object obj)
+	{
+		int num = 0;
+		SqlSession session = SingletonSessionFacUtils.getInstance().openSession();
+    	EquipmentMapper dao = session.getMapper(EquipmentMapper.class);
+    	//核心代码
+		num =  dao.update(obj);
+		
+		session.commit();
+		session.close();
+		return num;
+	}
+	
+	public Integer delete(Object obj)
+	{
+		int num = 0;
+		SqlSession session = SingletonSessionFacUtils.getInstance().openSession();
+    	EquipmentMapper dao = session.getMapper(EquipmentMapper.class);
+    	//核心代码
+		num =  dao.delete(obj);
+
+		session.commit();
+		session.close();
+		return num;
+	}
+
+	
 }

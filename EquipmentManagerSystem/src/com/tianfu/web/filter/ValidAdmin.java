@@ -25,7 +25,6 @@ public class ValidAdmin implements Filter {
 		// place your code here
 		HttpSession session = ((HttpServletRequest)request).getSession();
 		User user = (User) session.getAttribute("login_user");
-		System.out.println(user);
 		if(user.getAuthority() != 9)
 		{
 			request.setAttribute("errorMessage", "用户权限必须为 最高 错误 权限太低");

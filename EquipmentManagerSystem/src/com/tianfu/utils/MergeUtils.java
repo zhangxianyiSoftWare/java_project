@@ -9,7 +9,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.tianfu.domain.EquipWorkState;
 import com.tianfu.domain.Equipment;
 import com.tianfu.domain.User;
 import com.tianfu.domain.UserForm;
@@ -34,7 +33,7 @@ public class MergeUtils
 	{
 		//因为上传文件格式的原因 导致request  不能获取到真真意义上的参数 故采跳转方式
 		equip.setLogin_time(new Date());
-		equip.setState(EquipWorkState.WORKING);
+		equip.setState("WORKING");
 		//设置默认登出时间 不然解析 会报空指针异常
 		long currentTime = System.currentTimeMillis() + 3 * 60 * 60 * 1000;
 		Date date = new Date(currentTime);
@@ -82,41 +81,5 @@ public class MergeUtils
 		user.setTelephone(result.getString("telephone"));
 		user.setAuthority(Integer.parseInt(result.getString("anthority")));
 		user.setIntroduce_self(result.getString("introduce_self"));
-	}
-	
-	public static void mergeAttribute(Equipment equip,ResultSet result)throws SQLException, ParseException
-	{
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		equip.setName(result.getString("name"));
-		equip.setLogin_time(sdf.parse(result.getString("login_time")));
-		equip.setLogout_time(sdf.parse(result.getString("logout_time")));
-		equip.setDone_thing(result.getString("done_thing"));
-		
-		String data_state = result.getString("state");
-		if("working".equalsIgnoreCase(data_state))
-		{
-			equip.setState(EquipWorkState.WORKING);
-		}
-		else if("ended".equalsIgnoreCase(data_state))
-		{
-			equip.setState(EquipWorkState.END);
-		}
-		else if("broken".equalsIgnoreCase(data_state))
-		{
-			equip.setState(EquipWorkState.BROKEN);
-		}
-		
-		equip.setImage_path(result.getString("image_path"));
-		equip.setCategory(result.getString("category"));
-	}
-
-	public static void mergeAttribute(List<Equipment> equips, ResultSet result) throws SQLException, ParseException {
-		// TODO Auto-generated method stub
-		while(result.next())
-		{
-			Equipment equip = new Equipment();
-			mergeAttribute(equip, result);
-			equips.add(equip);
-		}
 	}
 }

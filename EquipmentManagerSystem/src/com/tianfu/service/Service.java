@@ -20,5 +20,10 @@ public interface Service
     public Object regiest(Object obj);
 
 
-	public List<Equipment> findAll();
+	public List<Object> findAll();
+	
+	public Integer update(Object obj);
+
+
+	public Integer delete(Object obj);
 }

@@ -7,11 +7,11 @@ public class Equipment
 	private String name;
 	private Date  login_time;
 	private Date  logout_time;
-	private EquipWorkState state;
+	private String state;
 	private String done_thing;
 	private String image_path;
 	private String category;
-	public Equipment(String name, Date login_time, Date logout_time, EquipWorkState state,
+	public Equipment(String name, Date login_time, Date logout_time, String state,
 			String done_thing) {
 		super();
 		this.name = name;
@@ -72,11 +72,11 @@ public class Equipment
 		this.logout_time = logout_time;
 	}
 
-	public EquipWorkState getState() {
+	public String getState() {
 		return state;
 	}
 
-	public void setState(EquipWorkState state) {
+	public void setState(String state) {
 		this.state = state;
 	}
 
@@ -100,6 +100,4 @@ public class Equipment
 	{
 		return name == null;
 	}
-	
-	
 }
