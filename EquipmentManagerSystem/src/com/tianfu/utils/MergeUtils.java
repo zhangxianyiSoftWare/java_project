@@ -27,6 +27,8 @@ public class MergeUtils
 		user.setSex(request.getParameter("sex"));
 		user.setTelephone(request.getParameter("telephone"));
 		user.setIntroduce_self(request.getParameter("introduce_self"));
+		
+		System.out.println("filter: uf"+user);
 	}
 	
 	public static void mergeAttribute(Equipment equip,HttpServletRequest request)
@@ -81,5 +83,41 @@ public class MergeUtils
 		user.setTelephone(result.getString("telephone"));
 		user.setAuthority(Integer.parseInt(result.getString("anthority")));
 		user.setIntroduce_self(result.getString("introduce_self"));
+	}
+	
+	public static void mergeAttribute(Equipment equip,ResultSet result)throws SQLException, ParseException
+	{
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		equip.setName(result.getString("name"));
+		equip.setLogin_time(sdf.parse(result.getString("login_time")));
+		equip.setLogout_time(sdf.parse(result.getString("logout_time")));
+		equip.setDone_thing(result.getString("done_thing"));
+		
+		String data_state = result.getString("state");
+		if("working".equalsIgnoreCase(data_state))
+		{
+			equip.setState("WORKING");
+		}
+		else if("ended".equalsIgnoreCase(data_state))
+		{
+			equip.setState("END");
+		}
+		else if("broken".equalsIgnoreCase(data_state))
+		{
+			equip.setState("BROKEN");
+		}
+		
+		equip.setImage_path(result.getString("image_path"));
+		equip.setCategory(result.getString("category"));
+	}
+
+	public static void mergeAttribute(List<Equipment> equips, ResultSet result) throws SQLException, ParseException {
+		// TODO Auto-generated method stub
+		while(result.next())
+		{
+			Equipment equip = new Equipment();
+			mergeAttribute(equip, result);
+			equips.add(equip);
+		}
 	}
 }

@@ -41,22 +41,22 @@ public class UserForm
 		//不要写在字符串形式的正则表达式中
 		if("".equals(post_box))
     	{
-    		message.put("post_box", "邮箱不能为空");
+    		message.put("errorPost_box", "The post_box can not be empty");
     	}
     	else if(!post_box.matches("[1-9][0-9]{5,10}@qq\\.[a-zA-Z]+"))//正则表达 限制字符个数
     	{
-    		message.put("post_box", "邮箱格式不正确 仅仅支持qq邮箱");
+    		message.put("errorPost_box", "Incorrect email format only supports qq email");
     	}
 		
 		//is user name vaild
 		//用户名的校验
     	if("".equals(user_name))
     	{
-    		message.put("user_name", "用户名不能为空");
+    		message.put("errorName", "The username cannot be empty");
     	}
     	else if(!user_name.matches("\\w{8,16}"))//正则表达 限制字符个数
     	{
-    		message.put("user_name", "用户名必须输入8到16位的字符");
+    		message.put("errorName", "User names must be entered in 8 to 16 characters");
     	}
     	
     	//密码正则 必须为 数组和字符的组合  
@@ -66,21 +66,11 @@ public class UserForm
     	
     	if("".equals(password))
     	{
-    		message.put("password", "密码不能为空");
+    		message.put("errorPassword", "The password cannot be empty");
     	}
     	else if(!password.matches("(?!^\\d+$)\\w{8,16}"))
     	{
-    		message.put("password", "密码必须式包含数字字母的组合 最低8位");
-    	}
-    	
-    	//校验电话号码 必须 式 11位的全数字
-    	if("".equals(telephone))
-    	{
-    		message.put("telephone", "电话号码不能为空");
-    	}
-    	else if(!telephone.matches("[1-9][0-9]{10}"))
-    	{
-    		message.put("telephone", "电话号码必须为11位的数字串");
+    		message.put("errorPassword", "The password must contain a minimum of 8 digits of alphanumeric combinations");
     	}
     	
     	//如果 错误消息中有数据 代不合法

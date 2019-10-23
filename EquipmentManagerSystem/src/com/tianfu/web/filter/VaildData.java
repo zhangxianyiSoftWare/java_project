@@ -1,6 +1,10 @@
 package com.tianfu.web.filter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -9,10 +13,16 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.tianfu.domain.AJaxResponseMsg;
 import com.tianfu.domain.UserForm;
+import com.tianfu.domain.AJaxResponseMsg.ResponseCode;
 import com.tianfu.utils.MergeUtils;
+import com.tianfu.utils.SendDataUtils;
+
+import net.sf.json.JSONObject;
 
 /**
  * Servlet Filter implementation class VaildData
@@ -25,24 +35,34 @@ public class VaildData implements Filter
 	 */
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		// TODO Auto-generated method stub
-		//验证码错误
+		AJaxResponseMsg<Map<String, String>> msg = new AJaxResponseMsg<Map<String, String>>();
+		Map<String, String> mapMsg = new HashMap<String, String>();
+		//msg.setMsg("failed");
 		if(! validCaptcha(request,response))
 		{
-			request.setAttribute("errorCaptcha","验证码错误");
-			request.getRequestDispatcher("/register.jsp").forward(request, response);
+			msg.setCode(ResponseCode.EXCEPTION);
+			msg.setMsg("input data error");
+			mapMsg.put("errorCaptcha", "Captcha is error");
+			msg.setData(mapMsg);
+			((HttpServletResponse)response).setStatus(500);
+			SendDataUtils.flushAJAXData(msg, response);
 			return;
 		}
 		//验证操作
-		 UserForm uf = new UserForm();
-		 //封装 userform 的数据
-		 MergeUtils.mergeAttribute(uf, (HttpServletRequest)request);
-		 
-		 if(! uf.vaildData())
-		 {
-			 request.setAttribute("errorMessage", uf.getMessage());
-			 request.getRequestDispatcher("/register.jsp").forward(request, response);
-			 return;
-		 }
+		UserForm uf = new UserForm();
+		//封装 userform 的数据
+		MergeUtils.mergeAttribute(uf, (HttpServletRequest)request);
+		if(! uf.vaildData())
+		{
+			mapMsg = uf.getMessage();
+			msg.setCode(ResponseCode.EXCEPTION);
+			msg.setMsg("input data error");
+			msg.setData(mapMsg);
+			//设置返回状态码
+			((HttpServletResponse)response).setStatus(500);
+			SendDataUtils.flushAJAXData(msg, response);
+			return;
+		}
 		// pass the request along the filter chain
 		HttpSession session = ((HttpServletRequest)request).getSession();
 		session.setAttribute("userForm", uf);

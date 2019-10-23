@@ -247,8 +247,6 @@ public class ServletEquiment extends BaseServlet
 	
 	private void parseUploadFile(FileItem fileitem,Equipment equip)
 	{
-		String filedVa = fileitem.getFieldName();
-		System.out.println("filed value = "+filedVa);
 		try 
 		{
 			//获取绝对的路径
@@ -262,12 +260,16 @@ public class ServletEquiment extends BaseServlet
 			}
 			//得到 上传的文件名字
 			String fileName = fileitem.getName();
-			System.out.println("filename = "+fileName);
 			//处理文件名
 			if(fileName != null)
 			{
 				// filename.substring(filename.lastIndexOf(File.separator)+1);
 				fileName = FilenameUtils.getName(fileName);// 效果同上
+			}
+			else 
+			{
+				//没有上传文件直接返回
+				return;
 			}
 			//同名文件的覆盖问题
 			fileName = UUID.randomUUID() + "_" + fileName;

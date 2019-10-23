@@ -28,7 +28,7 @@ public class ValidAdmin implements Filter {
 		if(user.getAuthority() != 9)
 		{
 			request.setAttribute("errorMessage", "用户权限必须为 最高 错误 权限太低");
-			request.getRequestDispatcher("/afterLogin/index.jsp").forward(request, response);
+			request.getRequestDispatcher("/afterLogin/index.html").forward(request, response);
 			return;
 		}
 		// pass the request along the filter chain

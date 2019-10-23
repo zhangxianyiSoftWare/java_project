@@ -1,6 +1,8 @@
 package com.tianfu.web.servlet;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -8,11 +10,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.tianfu.domain.AJaxResponseMsg;
 import com.tianfu.domain.User;
 import com.tianfu.domain.UserForm;
+import com.tianfu.domain.AJaxResponseMsg.ResponseCode;
 import com.tianfu.exception.UserExistException;
 import com.tianfu.service.impl.UserManager;
 import com.tianfu.utils.MergeUtils;
+import com.tianfu.utils.SendDataUtils;
 
 public class Register extends HttpServlet {
 
@@ -34,10 +39,11 @@ public class Register extends HttpServlet {
 		 * @throws IOException if an error occurred
 		 */
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		AJaxResponseMsg<Map<String, String>> msg = new AJaxResponseMsg<Map<String, String>>();
+		Map<String, String> mapMsg = new HashMap<String, String>();
 		//get the table data user fton
 		HttpSession session = request.getSession();
 		UserForm uForm = (UserForm) session.getAttribute("userForm");
-		
 		//调用业务逻辑  logic
 		UserManager service = new UserManager();
 		User user = new User(); 
@@ -49,8 +55,11 @@ public class Register extends HttpServlet {
 			if(num > 0)
 			{
 				// TODO: handle exception
-				request.setAttribute("errorMessage", "用户已经存在");
-		    	request.getRequestDispatcher("/jspComponent/registerFailed.jsp").forward(request, response);
+				msg.setCode(ResponseCode.REGISTER_FAILED);
+				msg.setMsg("valid exception");
+				response.setStatus(500);
+				mapMsg.put("errorPost_box", "user has exist");
+				SendDataUtils.flushAJAXData(msg, response);
 		    	return;
 			}
 		} catch (UserExistException e) {
@@ -63,12 +72,25 @@ public class Register extends HttpServlet {
 		//分发转向
 		if(service.regiest(uForm))
 		{
-			response.sendRedirect(request.getContextPath()+"/jspComponent/registerSuccess.jsp");
+			//注册成功重定向 清除所有的request  和response  数据
+			msg.setCode(ResponseCode.REGISTER_SUCC);
+			msg.setMsg("pass valid");
+			mapMsg.put("path","/htmlComponent/registerSuccess.html");
+			msg.setData(mapMsg);
+			response.setStatus(200);
+			SendDataUtils.flushAJAXData(msg, response);
 			return ;
 		}
 		else 
 		{
-			request.getRequestDispatcher("/jspComponent/registerFailed.jsp").forward(request, response);
+			//请求转发 转发 规定的request 数据
+			msg.setCode(ResponseCode.REGISTER_FAILED);
+			msg.setMsg("not pass valid");
+			mapMsg.put("path","/htmlComponent/registerFailed.html");
+			msg.setData(mapMsg);
+			//保证 调用 正确的回调函数
+			response.setStatus(200);
+			SendDataUtils.flushAJAXData(msg, response);
 			return ;
 		}
 		

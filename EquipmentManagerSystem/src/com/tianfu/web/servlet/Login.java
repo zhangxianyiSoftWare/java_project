@@ -2,16 +2,23 @@ package com.tianfu.web.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.tianfu.domain.AJaxResponseMsg;
 import com.tianfu.domain.User;
+import com.tianfu.domain.AJaxResponseMsg.ResponseCode;
 import com.tianfu.exception.UserExistException;
 import com.tianfu.service.impl.UserManager;
 import com.tianfu.utils.MergeUtils;
+import com.tianfu.utils.SendDataUtils;
+
+import net.sf.json.JSONObject;
 
 public class Login extends HttpServlet 
 {
@@ -34,9 +41,9 @@ public class Login extends HttpServlet
 		 * @throws IOException if an error occurred
 		 */
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-		request.setCharacterEncoding("UTF-8");
-		response.setContentType("text/html; charset=UTF-8");
+		//获取request 中 所拥有的msg 对象
+		AJaxResponseMsg<Map<String, String>> msg = new AJaxResponseMsg<Map<String, String>>();
+		Map<String, String> mapMsg = new HashMap<String, String>();
 		//获取表单数据
 		User user = new User();
 		MergeUtils.mergeAttribute(user,request);
@@ -49,28 +56,36 @@ public class Login extends HttpServlet
 			if(service.login(user))
 			{
 				request.getSession().setAttribute("login_user", user);
-		    	request.getRequestDispatcher("/afterLogin/index.jsp").forward(request, response);
-		    	return;
+				msg.setCode(ResponseCode.LOGIN_SUCC);
+				msg.setMsg("pass valid");
+				//讲路径封转
+				mapMsg.put("path","/afterLogin/index.html");
+				msg.setData(mapMsg);
+				response.setStatus(200);
+				SendDataUtils.flushAJAXData(msg, response);
+				return;
 			}
 			else 
 			{
-				request.setAttribute("errorPass", "密码不正确");
-		    	request.getRequestDispatcher("/login.jsp").forward(request, response);
-		    	return;
+				//密码不正确的情况下
+				msg.setMsg("valid error");
+				mapMsg.put("errorPass", "password is error");
+				response.setStatus(500);
+				SendDataUtils.flushAJAXData(msg, response);
+				return;
 			}
 		} 
 		catch (UserExistException e) 
 		{
 			// TODO Auto-generated catch block
-			request.setAttribute("errorMessage", "用户不存在 情先注册在登陆");
-	    	request.getRequestDispatcher("/login.jsp").forward(request, response);
-			e.printStackTrace();
+			mapMsg.put("errorPost_box", "the user is not exist please register");
+			msg.setData(mapMsg);
+			response.setStatus(500);
+			SendDataUtils.flushAJAXData(msg, response);
 			return;
 		}
 		
-		
 	}
-
 	/**
 		 * The doPost method of the servlet. <br>
 		 *

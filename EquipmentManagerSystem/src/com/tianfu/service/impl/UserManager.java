@@ -2,14 +2,14 @@ package com.tianfu.service.impl;
 
 import org.apache.ibatis.session.SqlSession;
 
-import com.tianfu.dao.UserMapper;
+import com.tianfu.dao.mybatis.dao.UserMapper;
 import com.tianfu.domain.User;
 import com.tianfu.domain.UserForm;
 import com.tianfu.exception.UserExistException;
 import com.tianfu.utils.MergeUtils;
 import com.tianfu.utils.SingletonSessionFacUtils;
 
-public class UserManager 
+public class UserManager
 {
 	public UserManager()
 	{
@@ -101,4 +101,5 @@ public class UserManager
     	}
     	return num;
     }
+	
 }

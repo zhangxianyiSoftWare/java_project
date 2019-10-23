@@ -67,18 +67,6 @@ h1 {
 	display: inline;
 }
 
-#divhead {
-	width: 100%;
-}
-
-.headtable {
-	width: 100%;
-}
-
-.headtable td {
-	padding: 10px 50px 25px 135px;
-}
-
 #divmenu {
 	width: 100%;
 	border-top-width: 4px;

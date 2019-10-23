@@ -3,10 +3,11 @@ package com.tianfu.service.impl;
 
 import java.util.List;
 import org.apache.ibatis.session.SqlSession;
-import com.tianfu.dao.EquipmentMapper;
+import com.tianfu.dao.mybatis.dao.EquipmentMapper;
 import com.tianfu.domain.Equipment;
 import com.tianfu.service.Service;
 import com.tianfu.utils.SingletonSessionFacUtils;
+
 public class EquipmentManager implements Service 
 {
 	public EquipmentManager()
