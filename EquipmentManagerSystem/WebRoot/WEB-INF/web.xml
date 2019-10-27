@@ -73,8 +73,6 @@
     <servlet-name>servletEquiment</servlet-name>
     <url-pattern>/servlet/equipment</url-pattern>
   </servlet-mapping>
-  
-  
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
   </welcome-file-list>

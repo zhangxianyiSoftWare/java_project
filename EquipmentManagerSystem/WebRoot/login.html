@@ -166,6 +166,7 @@ function submit_ajax()
 		type:"POST",
 		url:targetUrl,
 		cache:false,
+		async : false, 
 		dataType : "json",
 		data:data,
 		success:function(data){ 
@@ -193,11 +194,7 @@ function handleLoginSuccData(data)
 	{
 		window.location.href = "./afterLogin/index.html";
 	}
-	else if(MapData.path != null)
-	{
-		//其他情况跳转 具体页面
-        window.location.href = "./"+MapData.path;
-	}
+	window.location.href = "./afterLogin/index.html"
 }
 
 function handleLoginErrorData(data) 
@@ -226,6 +223,7 @@ function handleLoginErrorData(data)
 	// 和上面相似 
 	showErrorText(MapData.errorPass, "errorPass");
 	showErrorText(MapData.errorCaptcha, "errorCaptcha");
+	
 }
 </script>
 

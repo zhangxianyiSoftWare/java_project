@@ -7,9 +7,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
+import com.tianfu.domain.AsyncRefreshRequest;
 import com.tianfu.domain.Equipment;
+import com.tianfu.domain.PageInfo;
 import com.tianfu.domain.User;
 import com.tianfu.domain.UserForm;
 
@@ -119,5 +122,31 @@ public class MergeUtils
 			mergeAttribute(equip, result);
 			equips.add(equip);
 		}
+	}
+	
+	public static void mergeAttribute(PageInfo page_info,ServletRequest request)
+	{
+		page_info.setPage_curr(Integer.parseInt(request.getParameter("page_curr")));
+		page_info.setPage_num(Integer.parseInt(request.getParameter("page_num")));
+		page_info.setPage_size(Integer.parseInt(request.getParameter("page_size")));
+		page_info.setObj_cursor_start((page_info.getPage_curr()-1) * page_info.getPage_size() );
+	}
+	
+	public static void mergeAttribute(AsyncRefreshRequest asyncRespon,ServletRequest request)
+	{
+		PageInfo info = new PageInfo();
+		
+		info.setPage_curr(Integer.parseInt(request.getParameter("page_curr")));
+		info.setPage_num(Integer.parseInt(request.getParameter("page_num")));
+		info.setPage_size(Integer.parseInt(request.getParameter("page_size")));
+		info.setObj_cursor_start((info.getPage_curr()-1) * info.getPage_size() );
+		
+		asyncRespon.setPage_info(info);
+		
+		asyncRespon.setE_name(request.getParameter("e_name"));
+		asyncRespon.setE_status(request.getParameter("e_status"));
+		asyncRespon.setE_login_time(request.getParameter("e_login_time"));
+		asyncRespon.setE_logout_time(request.getParameter("e_logout_time"));
+		
 	}
 }

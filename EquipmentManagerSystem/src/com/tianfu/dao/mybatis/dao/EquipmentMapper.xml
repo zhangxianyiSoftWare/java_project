@@ -17,10 +17,50 @@
 		resultType="com.tianfu.domain.Equipment">
 		select * from equipment_t where name = #{name}
 	</select>
-	<select id="findAll" resultMap="ResultMap">
-		select * from equipment_t 
+	<!-- 获取表中 限制条件的 数据记录  -->
+	<select id="findAll" resultMap="ResultMap" parameterType="com.tianfu.domain.PageInfo">
+		select * from equipment_t limit #{obj_cursor_start},#{page_size}
 	</select>
 	
+	<!-- 获取表中 限制条件的 数据记录  -->
+	<select id="findAllByCommand" resultMap="ResultMap" parameterType="com.tianfu.domain.AsyncRefreshRequest">
+		select * from equipment_t where 1=1
+		<if test="e_name != '' and e_name != null">
+			and name like concat('%',#{e_name},'%')
+		</if>
+		<if test="e_status != '' and e_status != null">
+			and state like concat('%',#{e_status},'%')
+		</if>
+		<if test="e_login_time != '' and e_login_time != null">
+			and login_time like concat('%',#{e_login_time},'%')
+		</if>
+		<if test="e_logout_time != '' and e_logout_time != null">
+			and logout_time like concat('%',#{e_logout_time},'%')
+		</if>
+		limit #{page_info.obj_cursor_start},#{page_info.page_size}
+	</select>
+	
+	<!-- 获取表中 满足要求的记录 的总数 -->
+	<select id="getCountByCommand" resultType="Integer" parameterType="com.tianfu.domain.AsyncRefreshRequest">
+		select count(*) from equipment_t where 1=1
+		<if test="e_name != '' and e_name != null">
+			and name like concat('%',#{e_name},'%')
+		</if>
+		<if test="e_status != '' and e_status != null">
+			and state like concat('%',#{e_status},'%')
+		</if>
+		<if test="e_login_time != '' and e_login_time != null">
+			and login_time like concat('%',#{e_login_time},'%')
+		</if>
+		<if test="e_logout_time != '' and e_logout_time != null">
+			and logout_time like concat('%',#{e_logout_time},'%')
+		</if>
+		limit #{page_info.obj_cursor_start},#{page_info.page_size}
+	</select>
+	<!-- 获取标中记录 的总数 -->
+	<select id="getCount" resultType="Integer" >
+		select count(*) from equipment_t 
+	</select>
 	<!--添加数据 -->
 	<insert id="add" parameterType="com.tianfu.domain.Equipment" >
 		insert into equipment_t  (name,login_time,logout_time,state,done_thing,image_path) 

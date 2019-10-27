@@ -61,8 +61,6 @@ public class AJaxResponseMsg<T> implements Serializable
          * 程序异常
          */
         public static final String EXCEPTION = "-1";
-        
-        
         /**
          * login succ
          */
@@ -75,6 +73,23 @@ public class AJaxResponseMsg<T> implements Serializable
          * register FAILed
          */
         public static final String REGISTER_FAILED = "-11";
+        /**
+         * add equipment suncc
+         */
+        public static final String ADD_EQUIP_SUCC = "12";
+        /**
+         * add equipment failed
+         */
+        public static final String ADD_EQUIP_FAILED = "-12";
+        /**
+         * select equipment succ
+         */
+        public static final String SELECT_EQUIP_SUCC = "13";
+        
+        /**
+         * select equipment failed
+         */
+        public static final String SELECT_EQUIP_FAILED = "-13";
     }
 
     /**

@@ -6,7 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.ServletException;
@@ -21,17 +23,57 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
 
+import com.tianfu.domain.AJaxResponseMsg;
 import com.tianfu.domain.Equipment;
+import com.tianfu.domain.PageBean;
+import com.tianfu.domain.PageInfo;
+import com.tianfu.domain.AJaxResponseMsg.ResponseCode;
 import com.tianfu.service.Service;
 import com.tianfu.service.impl.EquipmentManager;
+import com.tianfu.utils.DirectoryUtils;
 import com.tianfu.utils.MergeUtils;
+import com.tianfu.utils.SendDataUtils;
 
 public class ServletEquiment extends BaseServlet 
 {
-	Service service = new EquipmentManager();
 	public ServletEquiment()
 	{
 		super();
+	}
+	/*
+	 * name findEquipmentBymanyCondition
+	 * para request
+	 * para response
+	 * */
+	public void findAllEquipments(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		//获取传入的页面信息
+		PageInfo page_info = new PageInfo();
+		MergeUtils.mergeAttribute(page_info, request);
+		//System.out.println(page_info);
+		//调用 业务逻辑
+		Service service = new EquipmentManager();
+		PageBean<Equipment> pageBean = service.findAll(page_info);
+		//跳转页面
+		AJaxResponseMsg<PageBean<Equipment>> msg = new AJaxResponseMsg<PageBean<Equipment>>();
+		if(! pageBean.isEmpty())
+		{
+			msg.setCode(ResponseCode.SELECT_EQUIP_SUCC);
+			msg.setMsg("select succ");
+			//讲路径封转
+			msg.setData(pageBean);
+			response.setStatus(200);
+			SendDataUtils.flushAJAXSelectData(msg, response);
+		}
+		else 
+		{
+			msg.setCode(ResponseCode.SELECT_EQUIP_FAILED);
+			msg.setMsg("select failed");
+			//讲路径封转
+			msg.setData(pageBean);
+			response.setStatus(500);
+			SendDataUtils.flushAJAXSelectData(msg, response);
+		}
 	}
 	
 	
@@ -43,20 +85,34 @@ public class ServletEquiment extends BaseServlet
 	public void addEquipment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		//get the encoding
-		String encode = super.config.getInitParameter("MyconfigEncoding");
-		request.setCharacterEncoding(encode!=null?encode:"UTF-8");
-
+		AJaxResponseMsg<Map<String, String>> msg = new AJaxResponseMsg<Map<String, String>>();
+		Map<String, String> mapMsg = new HashMap<String, String>();
+		
+		
 		Equipment equip = new Equipment();
 		MergeUtils.mergeAttribute(equip, request);
 		//解析上传文件 
 		parseUploadFile(equip,request,response);
+		Service service = new EquipmentManager();
 		String ret = (String)service.regiest(equip);
 		if("succ".equals(ret) || "existed".equals(ret))
 		{
-			request.getRequestDispatcher("/afterLogin/responseJSP/addSucc.jsp").forward(request, response);
+			msg.setCode(ResponseCode.ADD_EQUIP_SUCC);
+			msg.setMsg("pass valid");
+			//讲路径封转
+			mapMsg.put("path","/afterLogin/responseHTML/addSucc.html");
+			msg.setData(mapMsg);
+			response.setStatus(200);
+			SendDataUtils.flushAJAXData(msg, response);
 			return;
 		}
-		request.getRequestDispatcher("/afterLogin/responseJSP/addFailed.jsp").forward(request, response);
+		msg.setCode(ResponseCode.ADD_EQUIP_FAILED);
+		msg.setMsg("not pass valid");
+		//讲路径封转
+		mapMsg.put("path","/afterLogin/responseHTML/addFailed.html");
+		msg.setData(mapMsg);
+		response.setStatus(200);
+		SendDataUtils.flushAJAXData(msg, response);
 		return;
 	}
 	public void updateEquipment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -66,37 +122,54 @@ public class ServletEquiment extends BaseServlet
 		//解析上传文件 
 		parseUploadFile(equip,request,response);
 		equip.setName(request.getParameter("name"));
-		System.out.println("uppdate equip "+equip);
+		Service service = new EquipmentManager();
+		//System.out.println("uppdate equip "+equip);
 		Integer ret = service.update(equip);
-		System.out.println("update rows "+ret+" rows");
+		//如果更新条数 > 0 更新完成
+		AJaxResponseMsg<Map<String, String>> msg = new AJaxResponseMsg<Map<String, String>>();
 		if(ret > 0 )
 		{
-			request.getRequestDispatcher("/afterLogin/responseJSP/addSucc.jsp").forward(request, response);
+			
+			msg.setCode(ResponseCode.SUCCESS);
+			msg.setMsg("update succ");
+			//讲路径封转
+			response.setStatus(200);
+			SendDataUtils.flushAJAXData(msg, response);
 			return;
 		}
-		request.getRequestDispatcher("/afterLogin/responseJSP/addFailed.jsp").forward(request, response);
+		msg.setCode(ResponseCode.ERROR);
+		msg.setMsg("update error");
+		//讲路径封转
+		response.setStatus(500);
+		SendDataUtils.flushAJAXData(msg, response);
 		return;
     }
 	
 	public void deleteEquipment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		//get the encoding
-		String encode = super.config.getInitParameter("MyconfigEncoding");
-		request.setCharacterEncoding(encode!=null?encode:"UTF-8");
-		
 		Equipment equip = new Equipment();
 		//设置固定的
 		equip.setName(request.getParameter("name"));
-		System.out.println("nedd delete equipment"+equip);
-		
+		//System.out.println("nedd delete equipment"+equip);
+		Service service = new EquipmentManager();
 		Integer ret = service.delete(equip);
+		AJaxResponseMsg<Map<String, String>> msg = new AJaxResponseMsg<Map<String, String>>();
 		if(ret > 0 )
 		{
-			//删除成功之后 再次刷新 也就是执行所有查询
-			findEquipmentBymanyCondition(request,response);
+			
+			msg.setCode(ResponseCode.SUCCESS);
+			msg.setMsg("delete succ");
+			//讲路径封转
+			response.setStatus(200);
+			SendDataUtils.flushAJAXData(msg, response);
 			return;
 		}
-		request.getRequestDispatcher("/afterLogin/responseJSP/addFailed.jsp").forward(request, response);
+		msg.setCode(ResponseCode.ERROR);
+		msg.setMsg("delete error");
+		//讲路径封转
+		response.setStatus(500);
+		SendDataUtils.flushAJAXData(msg, response);
 		return;
 	}
 	
@@ -119,7 +192,7 @@ public class ServletEquiment extends BaseServlet
 			String file_name = path.substring(path.lastIndexOf("\\")+1);
 			//设置文件名字的编码  用于确保安装
 			//将不安全的名字字符 转换成可以识别的字符 避免出现无法识别的的响应
-			//file_name = URLEncoder.encode(file_name, "UTF-8");
+			file_name = URLEncoder.encode(file_name, "UTF-8");
 			//通知客户端 下载文件而非展现
 			response.setHeader("content-disposition", "attachment;filename="+file_name);
 			response.setHeader("content-type", "image/jpeg");
@@ -274,7 +347,7 @@ public class ServletEquiment extends BaseServlet
 			//同名文件的覆盖问题
 			fileName = UUID.randomUUID() + "_" + fileName;
 			//打散目录
-			String childDirectory = makeChildDirectory(storeDirectory, fileName);
+			String childDirectory = DirectoryUtils.makeChildDirectory(storeDirectory, fileName);
 			// 在storeDirectory下，创建完整目录下的文件
 			File file = new File(storeDirectory, childDirectory+ File.separator + fileName); // 绝对目录/日期目录/文件名
 			// 通过文件输出流将上传的文件保存到磁盘
@@ -282,6 +355,7 @@ public class ServletEquiment extends BaseServlet
 			fileitem.write(new File(storeDirectory, childDirectory+ File.separator + fileName));
 			//删除临时文件
 			fileitem.delete();
+			//空文件目录 需要删除？
 			
 			//设置equip 的 文件路径
 			String file_path = file.getAbsolutePath();
@@ -299,38 +373,4 @@ public class ServletEquiment extends BaseServlet
 		
 	}
 	
-	
-	// 目录打散
-	private String makeChildDirectory(File storeDirectory, String filename) {
-		int hashcode = filename.hashCode();// 返回字符转换的32位hashcode码
-		String code = Integer.toHexString(hashcode); // 把hashcode转换为16进制的字符
-														// abdsaf2131safsd
-		String childDirectory = code.charAt(0) + File.separator
-				+ code.charAt(1); // a/b
-		// 创建指定目录
-		File file = new File(storeDirectory, childDirectory);
-		if (!file.exists()) {
-			file.mkdirs();
-		}
-		return childDirectory;
-	}
-	
-    /*
-	 * name findEquipmentBymanyCondition
-	 * para request
-	 * para response
-	 * */
-    public void findEquipmentBymanyCondition(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-    {
-    	response.setContentType("text/html;charset=UTF-8");
-		//调用 业务逻辑
-		List<Object> list = service.findAll();
-		//跳转页面
-		if(list!=null)
-		{
-			request.setAttribute("equipments", list);//把list放入到request对象中
-			request.getRequestDispatcher("/afterLogin/admin/admin.jsp").forward(request, response);
-		}
-    }
-    
 }

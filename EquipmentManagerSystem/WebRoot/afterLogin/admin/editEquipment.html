@@ -1,22 +1,39 @@
-<%@ page language="java" contentType="text/html; charset=utf-8"
-    pageEncoding="utf-8"%>
-<!doctype html public "-//w3c//dtd html 4.01 transitional//en" "http://www.w3.org/tr/html4/loose.dtd">
-
-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/tr/html4/loose.dtd">
 <html>
 <head>
 <meta http-equiv="content-language" content="zh-cn">
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<link href="${pageContext.request.contextPath}/afterlogin/css/style.css" type="text/css" rel="stylesheet">
+<link href="/EquipmentManagerSystem/afterlogin/css/style.css" type="text/css" rel="stylesheet">
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script language="javascript" type="text/javascript">
+	//页面 一 加载  就执行
+	$(document).ready(function(){  
+     load_edit_name();
+	}); 
+	
+	function load_edit_name()
+	{
+		//只能传一个参数
+		var loc = location.href;
+		var params_index=loc.indexOf("?");//取得=号的位置
+		//如果没有 则返回整个字符串
+		var params = loc.split("&");
+		for(var i = 0;i<params.length;++i)
+		{
+			var eq_index = params[i].indexOf("=");
+			var edit_name=decodeURI(params[i].substr(eq_index+1));//从=号后面的内容
+			if(0 == i)
+			{
+				console.log("edit_name: "+edit_name);
+				$("#edit_name").html(edit_name);
+			}
+		}
+	}
+</script>
 </head>
-
-<%  
-	String edit_name = request.getParameter("name"); 
-%>
-
 <body>
-	<form 	id="useraction_save_do" name="Form1"
-			action="${pageContext.request.contextPath }/servlet/equipment?method=updateEquipment&name=${param.name}" 
+	<form 	id="edit_equipment_update" name="Form1"
+			action="/EquipmentManagerSystem/servlet/equipment?method=updateEquipment" 
 			enctype="multipart/form-data"
 			method="post">
 		&nbsp;
@@ -32,8 +49,8 @@
 			<tr>
 				<td align="center" bgcolor="#f5fafe" class="ta_01">设备名称：</td>
 				<td class="ta_01" bgcolor="#ffffff">
-					<span>
-						<%=edit_name%>
+					<span id="edit_name">
+						
 					</span>
 				</td>
 				<td align="center" bgcolor="#f5fafe" class="ta_01">设备状态：</td>
@@ -81,7 +98,7 @@
 			</tr>
 			<tr>
 				<td align="center" colspan="4" class="sep1">
-				<img src="${pageContext.request.contextPath }/afterlogin/images/shim.gif">
+				<img src="/EquipmentManagerSystem/afterlogin/images/shim.gif">
 				</td>
 			</tr>
 
@@ -92,7 +109,7 @@
 					
 					
 						
-					<input type="submit" class="button_ok" value="确定">	
+					<input type="button" onclick="ajax_submit()" class="button_ok" value="确定" >	
 						
 					<font face="宋体">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font>
 					
@@ -110,4 +127,45 @@
 		</table>
 	</form>
 </body>
+
+<script type="text/javascript">
+function ajax_submit()
+{
+	//获取请求路径
+	//通过 URL 请求 名字
+	var targetUrl = $("#edit_equipment_update").attr("action")+"&name="+$("#edit_name").text();
+	var data = new FormData($( "#edit_equipment_update" )[0]); 
+	console.log("url: "+targetUrl);
+	$.ajax({
+		type:"POST",
+		url:targetUrl,
+		cache:false,
+		async : false, //同步提交
+		dataType : "json",
+		cache: false,    //上传文件不需缓存
+     	processData: false, 
+     	contentType: false,
+		data:data,
+		success:function(data){ 
+ 			handleEditSuccData(data);
+ 		},
+ 		error:function(data){ 
+ 			handleEditErrorData(data);
+ 		}
+	});
+	
+}
+
+function handleEditSuccData(data)
+{
+	//定义信号 1 为 重新刷新页面
+	window.location.href = "./admin.html?signal=1";
+}
+
+function handleEditErrorData(data)
+{
+	console.log("未知错误 编辑失败");
+}
+</script>
+
 </html>

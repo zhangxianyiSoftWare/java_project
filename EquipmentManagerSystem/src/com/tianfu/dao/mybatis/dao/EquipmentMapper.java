@@ -2,7 +2,9 @@ package com.tianfu.dao.mybatis.dao;
 
 import java.util.List;
 
+import com.tianfu.domain.AsyncRefreshRequest;
 import com.tianfu.domain.Equipment;
+import com.tianfu.domain.PageInfo;
 
 public interface EquipmentMapper 
 {
@@ -17,5 +19,9 @@ public interface EquipmentMapper
 	public Object find(Object obj);
 	public Integer update(Object obj);
 	//通过传入的对象 主键值 获取 数据库中的对象
-	public List<Object> findAll();
+	public List<Equipment> findAll(PageInfo info);
+	public List<Equipment> findAllByCommand(AsyncRefreshRequest asyncRequest);
+	//根据要求查出的记录总数 用于分页
+	public Integer getCountByCommand(AsyncRefreshRequest asyncRequest);
+	public Integer getCount();
 }
